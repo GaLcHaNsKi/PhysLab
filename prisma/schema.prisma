@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  nickname     String    @unique
+  email        String    @unique
+  passwordHash String
+  name         String?
+  surname      String?
+  createdAt    DateTime  @default(now()) @db.Timestamp
+  lastLoginAt  DateTime? @db.Timestamp
+  aboutMe      String?
+
+  laboratories      UserLaboratories[]
+  laboratoriesOwned Laboratory[]       @relation("Owner")
+  comments          Comments[]         @relation("Author")
+  editedComments    Comments[]         @relation("EditedBy")
+  uploadedFiles     File[]
+  posts             Post[]            @relation("PostAuthor")
+  editedPosts       Post[]            @relation("PostEditedBy")
+  deletedPosts      Post[]            @relation("PostDeletedBy")
+
+  @@map("users")
+}
+
+model Laboratory {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  ownerId     Int
+  owner       User       @relation(fields: [ownerId], references: [id], name: "Owner")
+  createdAt   DateTime   @default(now()) @db.Timestamp
+  visibility  Visibility
+
+  usersLaboratories UserLaboratories[]
+  equipments        EquipmentLaboratories[]
+  workers           LaboratoryWorker[]
+  posts             Post[]
+
+  @@map("laboratories")
+}
+
+model UserLaboratories {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  laboratoryId Int
+  laboratory   Laboratory @relation(fields: [laboratoryId], references: [id], onDelete: Cascade)
+  roleId       Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  joinedAt     DateTime   @default(now()) @db.Timestamp
+
+  @@index([userId, laboratoryId])
+  @@unique([userId, laboratoryId])
+  @@map("user_laboratories")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  UsersLaboratories UserLaboratories[]
+  RolePermission    RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  description    String?
+  rolePermission RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  permissionId Int
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Equipment {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  description  EquipmentDescription[]
+  laboratories EquipmentLaboratories[]
+
+  @@map("equipment")
+}
+
+model EquipmentDescription {
+  id          Int       @id @default(autoincrement())
+  equipmentId Int
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+  description String    @db.Text
+
+  laboratories EquipmentLaboratories[]
+
+  @@map("equipment_descriptions")
+}
+
+model EquipmentLaboratories {
+  id            Int                   @id @default(autoincrement())
+  laboratoryId  Int
+  laboratory    Laboratory            @relation(fields: [laboratoryId], references: [id], onDelete: Cascade)
+  equipmentId   Int
+  equipment     Equipment             @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  descriptionId Int?
+  description   EquipmentDescription? @relation(fields: [descriptionId], references: [id], onDelete: SetNull)
+  quantity      Int
+
+  @@map("equipment_laboratories")
+}
+
+model LaboratoryWorker {
+  id           Int        @id @default(autoincrement())
+  laboratoryId Int
+  laboratory   Laboratory @relation(fields: [laboratoryId], references: [id], onDelete: Cascade)
+  name         String
+  surname      String
+  fathername   String?
+  email        String?
+  phone        String?
+  description  String?
+
+  @@map("laboratory_workers")
+}
+
+model Comments {
+  id   Int    @id @default(autoincrement())
+  text String @db.Text
+
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], name: "Author")
+  createdAt   DateTime  @default(now()) @db.Timestamp
+  editedAt    DateTime? @db.Timestamp
+  editedById  Int?
+  editedBy    User?     @relation(fields: [editedById], references: [id], name: "EditedBy")
+
+  isModerated Boolean @default(true) // если да, то показывать комментарий, если нет, то отправить уведомление модераторам. При пропуске отправить уведомление пользователю
+  postId      Int
+  post        Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  answerId Int?
+  answer   Comments?  @relation("Answer", fields: [answerId], references: [id])
+  answers  Comments[] @relation("Answer")
+
+  @@map("comments")
+}
+
+model Post {
+  id               Int    @id @default(autoincrement())
+  title            String
+  text             String @db.Text
+  
+  laboratoryWorkId Int?
+  laboratoryWork LaboratoryWork? @relation(fields: [laboratoryWorkId], references: [id])
+
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], name: "PostAuthor")
+  createdAt DateTime @default(now()) @db.Timestamp
+
+  editedAt    DateTime? @db.Timestamp
+  editedById  Int?
+  editedBy    User?     @relation(fields: [editedById], references: [id], name: "PostEditedBy")
+  isDeleted   Boolean   @default(false)
+  deletedById Int?
+  deletedBy   User?     @relation(fields: [deletedById], references: [id], name: "PostDeletedBy")
+
+  tags String[]
+
+  files File[]
+
+  laboratoryId Int
+  laboratory   Laboratory @relation(fields: [laboratoryId], references: [id], onDelete: Cascade)
+
+  comments Comments[]
+
+  @@map("posts")
+}
+
+model LaboratoryWork {
+  id       Int      @id @default(autoincrement())
+  course   Int
+  semester Semester
+
+  posts Post[]
+}
+
+model File {
+  id           Int      @id @default(autoincrement())
+  uuidName     String   @unique @default(uuid())
+  name         String
+  uploadedAt   DateTime @default(now())
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  uploadedById Int
+
+  postId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  isImage Boolean
+
+  @@map("files")
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum Semester {
+  SPRING
+  AUTUMN
+}
