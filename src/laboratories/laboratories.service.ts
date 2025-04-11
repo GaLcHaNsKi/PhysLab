@@ -100,3 +100,30 @@ export async function checkPermission(laboratoryId: number, permission: string, 
 
     return !!res
 }
+
+export async function getLaboratoryById(laboratoryId: number) {
+    const laboratory = await prisma.laboratory.findUnique({
+        where: {
+            id: laboratoryId
+        },
+        select: {
+            name: true,
+            description: true,
+            visibility: true,
+            ownerId: true
+        }
+    })
+
+    return laboratory
+}
+
+export async function checkIsUserInLaboratory(laboratoryId: number, userId: number) {
+    const res = await prisma.userLaboratories.findFirst({
+        where: {
+            laboratoryId,
+            userId
+        }
+    })
+
+    return !!res
+}

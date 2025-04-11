@@ -114,7 +114,7 @@ authRoute.post("/refresh-token", async (c) => {
         console.error(e)
         return c.json({ error: "Invalid token!" }, 401)
     }
-
+    
     if (!data) return c.json({ error: "Unauthorized" }, 401)
     
     if (!data.isRefresh) return c.json({ error: "Invalid token!" }, 401)

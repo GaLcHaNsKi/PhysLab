@@ -28,6 +28,8 @@ async function init() {
             { name: "delete_unowned_comment" },
             { name: "uploading_documents" },
             { name: "delete_unowned_documents" },
+            { name: "create_joining_admin_link" }, //23
+            { name: "create_joining_other_link" } // 24
         ]
     })
     // adding roles
@@ -66,6 +68,8 @@ async function init() {
             { roleId: 1, permissionId: 20 },
             { roleId: 1, permissionId: 21 },
             { roleId: 1, permissionId: 22 },
+            { roleId: 1, permissionId: 23 },
+            { roleId: 1, permissionId: 24 },
             // admin
             { roleId: 2, permissionId: 2 },
             { roleId: 2, permissionId: 3 },
@@ -77,6 +81,7 @@ async function init() {
             { roleId: 2, permissionId: 17 },
             { roleId: 2, permissionId: 19 },
             { roleId: 2, permissionId: 20 },
+            { roleId: 1, permissionId: 24 },
             // researcher
             { roleId: 3, permissionId: 4 },
             { roleId: 3, permissionId: 12 },
