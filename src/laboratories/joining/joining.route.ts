@@ -51,7 +51,7 @@ joiningRoute.post("/:token", async (c) => {
     }
 })
 
-joiningRoute.post("/:labId/guest", (c) => {
+joiningRoute.post("/:labId/guest", async (c) => {
     const joinerId = c.get("user").id
     
 })
