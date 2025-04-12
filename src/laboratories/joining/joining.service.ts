@@ -24,6 +24,10 @@ export async function generateJoiningToken(laboratoryId: number, userId: number,
         }
     })
     if (!role) throw "Role not found"
+    
+    if (role.name == "root") {
+        throw "You cannot do it, because root is only one user, and it is a owner"
+    }
 
     if (role.name == "admin") {
         if (!await checkPermission(laboratoryId, "create_joining_admin_link", userId)) throw "You don't have permission to create joining link for admin"
@@ -49,10 +53,21 @@ export async function joinLaboratoryByLink(token: string, joinerId: number) {
 
     if (!data || !data.laboratoryId || !data.roleId) throw "Invalid token"
 
+    const role = await prisma.role.findUnique({
+        where: {
+            id: data.roleId
+        },
+        select: {
+            name: true
+        }
+    })
+    if (role?.name === "root") throw "You cannot do it, because root is only one user, and it is a owner"
+
     // i need to add joiner to target laboratory
-    const row = prisma.userLaboratories.create({
+    const row = await prisma.userLaboratories.create({
         data: {
-            ...data,
+            laboratoryId: data.laboratoryId,
+            roleId: data.roleId,
             userId: joinerId
         }
     })

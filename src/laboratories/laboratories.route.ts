@@ -7,7 +7,7 @@ import { joiningRoute } from "./joining/joining.route"
 
 export const laboratoriesRoute = new Hono<{ Variables: MiddlewareVariables }>()
 
-laboratoriesRoute.route("/:id/joining", joiningRoute)
+laboratoriesRoute.route("/joining", joiningRoute)
 
 laboratoriesRoute.post("/",
     validator('json', (value, c) => {
