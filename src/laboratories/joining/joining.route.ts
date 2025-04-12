@@ -50,3 +50,8 @@ joiningRoute.post("/:token", async (c) => {
         return c.json({ error: "Internal server error" }, 500)
     }
 })
+
+joiningRoute.post("/:labId/guest", (c) => {
+    const joinerId = c.get("user").id
+    
+})
