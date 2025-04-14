@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { MiddlewareVariables } from "../..";
 import { validator } from "hono/validator";
 import { JoiningTokenSchema } from "./joining.schema";
-import { generateJoiningToken, joinLaboratoryByLink } from "./joining.service";
+import { generateJoiningToken, joinLaboratoryByLink, joinUserAsGuest } from "./joining.service";
 
 export const joiningRoute = new Hono<{ Variables: MiddlewareVariables }>()
 
@@ -52,6 +52,20 @@ joiningRoute.post("/:token", async (c) => {
 })
 
 joiningRoute.post("/:labId/guest", async (c) => {
+    const laboratoryId = +(c.req.param("labId") || "")
+    if (isNaN(laboratoryId)) 
+        return c.json({ error: "Invalid laboratory id" }, 400)
+
     const joinerId = c.get("user").id
     
+    try {
+        const res = await joinUserAsGuest(laboratoryId, joinerId)
+
+        return c.json({ message: "Welcome" }, 200)
+    } catch (e: any) {
+        if (e.code === "P2002") return c.json({ error: "You alredy joined to this laboratory" }, 409)
+        else console.error(e)
+
+        return c.json({ error: "Internal server error" }, 500)
+    }
 })

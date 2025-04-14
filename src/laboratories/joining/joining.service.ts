@@ -74,3 +74,24 @@ export async function joinLaboratoryByLink(token: string, joinerId: number) {
 
     return row
 }
+
+export async function joinUserAsGuest(laboratoryId: number, joinerId: number) {
+    const role = await prisma.role.findUnique({
+        where: {
+            name: "guest"
+        },
+        select: {
+            id: true
+        }
+    })
+
+    const row = await prisma.userLaboratories.create({
+        data: {
+            laboratoryId,
+            roleId: role!.id,
+            userId: joinerId
+        }
+    })
+
+    return row
+}
