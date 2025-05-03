@@ -5,6 +5,7 @@ import { SignInSchema, SignUpSchema } from './auth.shema'
 import { sign, verify } from "hono/jwt"
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { env } from 'bun'
+import { errorAnswer, successAnswer } from '../../answers'
 
 export const authRoute = new Hono()
 
@@ -34,7 +35,7 @@ authRoute.post("/sign-in",
                 maxAge: ACCESS_TOKEN_LIVE,
                 httpOnly: true,
                 //secure: true,
-                path: "/api"
+                path: "/"
             })
             setCookie(c, "Refresh-Token", refreshToken, {
                 maxAge: REFRESH_TOKEN_LIVE,
@@ -43,20 +44,21 @@ authRoute.post("/sign-in",
                 path: "/auth/refresh-token"
             })
 
-            return c.text("Welcome back!", 200)
+            return c.json(successAnswer, 200)
         }
         catch (e: any) {
             if (e === "Incorrect password") return c.json({ error: e }, 400)
             else if (e === "User not found") return c.json({ error: e }, 404)
             else console.error(e)
-            
-            return c.text("Error!", 500)
+        
+            return c.json(errorAnswer, 500)
         }
     }
 )
 
 authRoute.post("/sign-up",
     validator('json', (value, c) => {
+        console.log(value)
         const parsed = SignUpSchema.safeParse(value)
         if (!parsed.success) return c.text(parsed.error.message, 400)
 
@@ -84,13 +86,13 @@ authRoute.post("/sign-up",
                 path: "/auth/refresh-token"
             })
 
-            return c.text("Welcome!", 200)
+            return c.json(successAnswer, 200)
         } catch (error: any) {
             if (error.message === "Passwords do not match!") return c.json({ error: error.message }, 400)
             if (error.code === "P2002") return c.json({ error: "This nickname or email is busy!" }, 409)
             else console.error(error)
 
-            return c.text("Error!", 500)
+            return c.json(errorAnswer, 500)
         }
     }
 )
@@ -129,5 +131,5 @@ authRoute.post("/refresh-token", async (c) => {
         path: "/"
     })
     
-    return c.text("Nice work!", 200)
+    return c.json(successAnswer, 200)
 })

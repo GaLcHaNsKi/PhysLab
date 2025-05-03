@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Visibility } from "@prisma/client";
 import { env } from "bun";
 import { sign, verify } from "hono/jwt";
 import { checkPermission } from "../laboratories.service";
@@ -24,17 +24,17 @@ export async function generateJoiningToken(laboratoryId: number, userId: number,
         }
     })
     if (!role) throw "Role not found"
-    
-    if (role.name == "root") {
+    else if (role.name == "root") {
         throw "You cannot do it, because root is only one user, and it is a owner"
     }
-
-    if (role.name == "admin") {
+    else if (role.name == "admin") {
         if (!await checkPermission(laboratoryId, "create_joining_admin_link", userId)) throw "You don't have permission to create joining link for admin"
     }
-
-    if (! await checkPermission(laboratoryId, "create_joining_other_link", userId)) throw "You don't have permission to create joining link"
-
+    else if (role.name == "student") {
+        if (!await checkPermission(laboratoryId, "create_joining_student_link", userId)) throw "You don't have permission to create joining link for students"
+    }
+    else if (!await checkPermission(laboratoryId, "create_joining_other_link", userId)) throw "You don't have permission to create joining link"
+    
     // generating jwt token
 
     const token = await sign({
@@ -76,6 +76,14 @@ export async function joinLaboratoryByLink(token: string, joinerId: number) {
 }
 
 export async function joinUserAsGuest(laboratoryId: number, joinerId: number) {
+    const lab = await prisma.laboratory.findUnique({
+        where: {
+            id: laboratoryId
+        }
+    })
+    if (!lab) return lab
+    if (lab.visibility == Visibility.PRIVATE) throw "This is a private laboratory. You cannot join it without inviting."
+    
     const role = await prisma.role.findUnique({
         where: {
             name: "guest"

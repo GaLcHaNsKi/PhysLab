@@ -1,13 +1,19 @@
 import { Hono } from "hono"
-import { MiddlewareVariables } from ".."
 import { validator } from "hono/validator"
-import { LaboratoryCreateSchema, LaboratoryEditSchema } from "./laboratories.shema"
-import { checkPermission, createLaboratory, editLaboratory, getAllPublicLaboratoriesList, deleteLaboratory, getLaboratoryById, checkIsUserInLaboratory } from "./laboratories.service"
+import { LaboratoryCreateSchema, LaboratoryEditSchema, LaboratoryFilterSchema } from "./laboratories.shema"
+import { checkPermission, createLaboratory, editLaboratory, getAllPublicLaboratoriesList, deleteLaboratory, getLaboratoryById, checkIsUserInLaboratory, getFilteredLaboratories } from "./laboratories.service"
 import { joiningRoute } from "./joining/joining.route"
+import { participantsRoute } from "./participants/participants.route"
+import { errorAnswer, undefinedAnswer } from "../../answers"
+import { MiddlewareVariables } from "../.."
+import { postsRoute } from "./posts/posts.route"
 
 export const laboratoriesRoute = new Hono<{ Variables: MiddlewareVariables }>()
 
 laboratoriesRoute.route("/joining", joiningRoute)
+laboratoriesRoute.route("/:labId/participants", participantsRoute)
+laboratoriesRoute.route("/:labId/posts", postsRoute)
+
 
 laboratoriesRoute.post("/",
     validator('json', (value, c) => {
@@ -17,6 +23,7 @@ laboratoriesRoute.post("/",
         return parsed.data
     }),
     async (c) => {
+        console.log(c.get("user"))
         const ownerId = c.get("user").id
         const data = c.req.valid("json")
         
@@ -28,7 +35,7 @@ laboratoriesRoute.post("/",
             if (e.code === "P2002") return c.json({ error: "This laboratory name is busy" }, 409)
             else console.error(e)
 
-            return c.json({ error: "Internal server error" }, 500)
+            return c.json(errorAnswer, 500)
         }
     }
 )
@@ -56,29 +63,38 @@ laboratoriesRoute.put("/",
             if (e.code === "P2002") return c.json({ error: "This laboratory name is busy" }, 409)
             else console.error(e)
 
-            return c.json({ error: "Internal server error" }, 500)
+            return c.json(errorAnswer, 500)
         }
     }
 )
 
-laboratoriesRoute.get("/", async (c) => {
-    const page = parseInt(c.req.query("page") ?? "1")
-    const limit = parseInt(c.req.query("limit") ?? "10")
+laboratoriesRoute.post("/get-all", 
+    validator('json', (value, c) => {
+        const parsed = LaboratoryFilterSchema.safeParse(value)
+        if (!parsed.success) return c.text(parsed.error.message, 400)
 
-    if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1) {
-        return c.text("Invalid pagination values", 400)
+        return parsed.data
+    }),
+    async (c) => {
+        const page = parseInt(c.req.query("page") ?? "1")
+        const limit = parseInt(c.req.query("limit") ?? "10")
+
+        if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1) {
+            return c.text("Invalid pagination values", 400)
+        }
+
+        const filter = c.req.valid("json")
+        try {
+            const laboratories = await getFilteredLaboratories(page, limit, filter, "PUBLIC")
+            
+            return c.json(laboratories, 200)
+        } catch(e: any) {
+            console.error(e)
+
+            return c.json(errorAnswer, 500)
+        }
     }
-
-    try {
-        const laboratories = await getAllPublicLaboratoriesList(page, limit)
-        
-        return c.json(laboratories, 200)
-    } catch(e: any) {
-        console.error(e)
-
-        return c.json({ error: "Internal server error" }, 500)
-    }
-})
+)
 
 laboratoriesRoute.delete("/:id", async (c) => {
     const laboratoryId = parseInt(c.req.param("id"))
@@ -97,7 +113,7 @@ laboratoriesRoute.delete("/:id", async (c) => {
     } catch(e: any) {
         console.error(e)
 
-        return c.json({ error: "Internal server error" }, 500)
+        return c.json(errorAnswer, 500)
     }
 })
 
@@ -119,7 +135,7 @@ laboratoriesRoute.get("/:id", async (c) => {
     } catch(e: any) {
         console.error(e)
 
-        return c.json({ error: "Internal server error" }, 500)
+        return c.json(errorAnswer, 500)
     }
 
 })

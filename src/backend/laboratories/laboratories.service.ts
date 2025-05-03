@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { LaboratoryCreateSchemaType, LaboratoryEditSchemaType } from "./laboratories.shema";
+import { PrismaClient, Visibility } from '@prisma/client';
+import { LaboratoryCreateSchemaType, LaboratoryEditSchemaType, LaboratoryFilterSchemaType } from "./laboratories.shema";
 
 const prisma = new PrismaClient()
 
@@ -85,7 +85,7 @@ export async function checkPermission(laboratoryId: number, permission: string, 
     const res = await prisma.rolePermission.findFirst({
         where: {
             role: {
-                UsersLaboratories: {
+                usersLaboratories: {
                     some: {
                         userId,
                         laboratoryId
@@ -126,4 +126,55 @@ export async function checkIsUserInLaboratory(laboratoryId: number, userId: numb
     })
 
     return !!res
+}
+
+export async function getLaboratoriesByUserId(userId: number) {
+    const res = await prisma.userLaboratories.findMany({
+        where: {
+            userId
+        },
+        select: {
+            laboratory: {
+                select: {
+                    id: true,
+                    name: true
+                }
+            }
+        }
+    })
+
+    return res
+}
+
+export async function getFilteredLaboratories(
+    page: number = 1,
+    limit: number = 10,
+    filter: LaboratoryFilterSchemaType,
+    visibility: Visibility | undefined = undefined
+) {
+    const where: any = { visibility }
+
+    if (filter.name) where.name = { contains: filter.name, mode: "insensitive" }
+    if (filter.authorNickname) where.owner = {
+        nickname: { contains: filter.authorNickname, mode: "insensitive" }
+    }
+
+    const laboratories = await prisma.laboratory.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+            id: true,
+            name: true,
+            owner: {
+                select: {
+                    nickname: true
+                }
+            },
+            description: true,
+            visibility: true
+        }
+    })
+
+    return laboratories
 }

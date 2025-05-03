@@ -11,7 +11,7 @@ async function init() {
             { name: "revoke_access" },
             { name: "view_laboratory_members" },
             { name: "delete_laboratory_members" },
-            { name: "view_users_list" },
+            { name: "view_admin_list" },
             { name: "delete_users" },
             { name: "delete_laboratory" },
             { name: "edit_laboratory_settings" },
@@ -19,7 +19,7 @@ async function init() {
             { name: "add_laboratory_worker" },
             { name: "add_equipment" },
             { name: "create_post" },
-            { name: "create_moderated_post" },
+            { name: "create_laboratory_work" },
             { name: "edit_unowned_posts" },
             { name: "delete_unowned_posts" },
             { name: "create_comment" },
@@ -29,7 +29,8 @@ async function init() {
             { name: "uploading_documents" },
             { name: "delete_unowned_documents" },
             { name: "create_joining_admin_link" }, //23
-            { name: "create_joining_other_link" } // 24
+            { name: "create_joining_other_link" }, // 24
+            { name: "create_joining_student_link" } // 25
         ]
     })
     // adding roles
@@ -70,6 +71,7 @@ async function init() {
             { roleId: 1, permissionId: 22 },
             { roleId: 1, permissionId: 23 },
             { roleId: 1, permissionId: 24 },
+            { roleId: 1, permissionId: 25 },
             // admin
             { roleId: 2, permissionId: 2 },
             { roleId: 2, permissionId: 3 },
@@ -86,15 +88,30 @@ async function init() {
             { roleId: 3, permissionId: 4 },
             { roleId: 3, permissionId: 12 },
             { roleId: 3, permissionId: 13 },
+            { roleId: 3, permissionId: 14 },
             { roleId: 3, permissionId: 15 },
             { roleId: 3, permissionId: 16 },
             { roleId: 3, permissionId: 17 },
             { roleId: 3, permissionId: 21 },
             { roleId: 3, permissionId: 22 },
             // student
-            { roleId: 4, permissionId: 14 },
+            { roleId: 4, permissionId: 13 },
             { roleId: 4, permissionId: 18 },
             { roleId: 4, permissionId: 21 },
+            { roleId: 4, permissionId: 25},
+        ]
+    })
+
+    await prisma.laboratoryWork.createMany({
+        data: [
+            { course: 1, semester: "AUTUMN" },
+            { course: 1, semester: "SPRING" },
+            { course: 2, semester: "AUTUMN" },
+            { course: 2, semester: "SPRING" },
+            { course: 3, semester: "AUTUMN" },
+            { course: 3, semester: "SPRING" },
+            { course: 4, semester: "AUTUMN" },
+            { course: 4, semester: "SPRING" }
         ]
     })
 }

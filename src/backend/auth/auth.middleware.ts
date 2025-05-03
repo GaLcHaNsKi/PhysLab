@@ -8,7 +8,7 @@ import { env } from "bun"
 const prisma = new PrismaClient()
 
 export const authMiddleware = createMiddleware(async (c, next) => {
-    if (c.req.path.startsWith("/auth/")) {
+    if (c.req.path.includes("/auth/") || c.req.path.endsWith("app") || c.req.path.includes("/public")) {
         return next()
     }
 
@@ -20,7 +20,7 @@ export const authMiddleware = createMiddleware(async (c, next) => {
     try {
         data = await verify(token, env.JWT_SECRET!!) as { userId: number }
     } catch (e: any) {
-        if (e.message.includes("expired")) return c.json({ error: "Unauthorized" }, 401)
+        if (e.message.includes("expired")) return c.json({ error: "Token expired" }, 401)
         else console.error(e)
 
         return c.text("Invalid token", 401)

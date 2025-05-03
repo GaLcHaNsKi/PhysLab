@@ -1,0 +1,162 @@
+html {
+    font-size: 18px;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+body {
+    background-color: #F9FAFB;
+    margin: 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 50px;
+
+    font-size: 1.1rem;
+    background-color: #E5E7EB;
+
+    a {
+        text-decoration: none;
+        color: #000;
+    }
+}
+
+.header-nav {
+    display: flex;
+    column-gap: 10px;
+    align-items: center;
+}
+
+header .logo {
+    font-size: 1.5rem;
+}
+
+.content {
+    padding: 20px;
+}
+
+.centered-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 80vh;
+    justify-content: center;
+}
+
+.auth-form, .elem-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+
+.auth-form {
+    color: #8f8f8f;
+}
+
+input, textarea, select {
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    
+    background-color: #ffffff;
+    border: #2F80ED solid 1px;
+    border-radius: 15px;
+
+    padding: 5px;
+}
+
+input {
+    width: 200px;
+}
+
+.required-field {
+    color: #ff7171;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+
+    text-area {
+        max-width: 100%;
+    }
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 5px;
+
+    input {
+        width: 200px;
+    }
+}
+
+.title-with-tool-button {
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+}
+
+button {
+    background-color: #ffffff;
+    border: #2F80ED solid 2px;
+    border-radius: 15px;
+
+    padding: 5px;
+}
+
+button:hover {
+    background-color: #cfe4ff;
+}
+
+button:active {
+    background-color: #58a0ff;
+}
+
+.error-message {
+    color: red;
+}
+
+.tool-button {
+    width: 30px;
+
+    img {
+        width: 100%;
+    }
+}
+
+.tool-button:hover {
+    transform: scale(1.1);
+    transition: 0.3s linear alternate;
+}
+
+#page-number {
+    color: #8f8f8f;
+}
+
+.content-with-menu {
+    display: flex;
+    column-gap: 50px;
+}
+
+menu {
+    border-right: #2F80ED 2px solid;
+
+    li {
+        min-width: 200px;
+        height: 30px;
+        align-content: center;
+        border-bottom: solid 2px #2F80ED;
+    }
+    li:hover {
+        background-color: #2F80ED;
+    }
+}
+
+.elem-list {
+    margin: 20px;
+}

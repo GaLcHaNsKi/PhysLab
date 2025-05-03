@@ -67,8 +67,8 @@ model Role {
   name        String  @unique
   description String?
 
-  UsersLaboratories UserLaboratories[]
-  RolePermission    RolePermission[]
+  usersLaboratories UserLaboratories[]
+  rolePermission    RolePermission[]
 
   @@map("roles")
 }
@@ -169,7 +169,7 @@ model Post {
   text             String @db.Text
   
   laboratoryWorkId Int?
-  laboratoryWork LaboratoryWork? @relation(fields: [laboratoryWorkId], references: [id])
+  laboratoryWork LaboratoryWork? @relation(fields: [laboratoryWorkId], references: [id], name: "LaboratoryWorkToPost")
 
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id], name: "PostAuthor")
@@ -199,7 +199,10 @@ model LaboratoryWork {
   course   Int
   semester Semester
 
-  posts Post[]
+  posts Post[] @relation("LaboratoryWorkToPost")
+
+  @@unique([course, semester])
+  @@map("laboratory_works")
 }
 
 model File {
