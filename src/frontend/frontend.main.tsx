@@ -31,6 +31,9 @@ appRoute.use(
                     {!isAuth && <HeaderMain />}
                     {isAuth && <HeaderAuth />}
                     {children}
+                    <footer>
+                        <span>PhysLab# 2025</span>
+                    </footer>
                 </body>
             </html>
         );

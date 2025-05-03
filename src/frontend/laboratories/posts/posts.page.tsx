@@ -26,7 +26,11 @@ postsPageRoute.get("/create", (c) => {
 
 postsPageRoute.get("/:id", (c) => {
     return c.render(
-        <></>,
+        <div class="content">
+            <h1 id="post-title"></h1>
+            <div class="post-content"></div>
+            <div class="comments"></div>
+        </div>,
         { title: "Посты" }
     )
 })
