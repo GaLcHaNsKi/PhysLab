@@ -1,6 +1,9 @@
 document.getElementById("submit").onclick = async () => {
     const form = document.getElementById("create-lab-form")
     const errorMessage = document.getElementById("error-message")
+    const loadingModal = document.getElementById("loading")
+
+    loadingModal.style.display = "none"
 
     const name = form.name.value.trim()
     const description = form.description.value.trim()
@@ -15,6 +18,8 @@ document.getElementById("submit").onclick = async () => {
         errorMessage.textContent = "Описание не может быть длиннее 500 символов."
         return
     }
+
+    loadingModal.style.display = "flex"
 
     try {
         const response = await fetch("/api/laboratories", {
@@ -33,6 +38,8 @@ document.getElementById("submit").onclick = async () => {
                 <h2>${response.status} ${response.statusText}</h2>
                 <p>${data.error || "Что-то пошло не так..."}</p>
             `
+
+            loadingModal.style.display = "none"
             return
         }
 
@@ -44,4 +51,5 @@ document.getElementById("submit").onclick = async () => {
             <p>${e}</p>
         `
     }
+    loadingModal.style.display = "none"
 }

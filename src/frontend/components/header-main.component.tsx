@@ -17,7 +17,7 @@ export function HeaderAuth() {
                 <a href="/app/laboratories">Laboratories</a>
             </nav>
             <nav class="header-nav">
-                <a href="/app/user/me">Home</a>
+                <a href="/app/users/me">Home</a>
             </nav>
         </header>
     )

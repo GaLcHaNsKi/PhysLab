@@ -28,7 +28,7 @@ app.use(
       }
     },
     onNotFound: (path, c) => {
-      console.log(`File not found: ${path}`);
+      console.error(`File not found: ${path}`);
       c.status(404);
       return c.text("File not found");
     },

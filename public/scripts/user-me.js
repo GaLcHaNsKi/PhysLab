@@ -7,7 +7,9 @@ const emailInput = document.getElementsByName("email")[0]
 const nameInput = document.getElementsByName("name")[0]
 const surnameInput = document.getElementsByName("surname")[0]
 const aboutMeInput = document.getElementsByName("aboutMe")[0]
+const loadingModal = document.getElementById("loading")
 
+loadingModal.style.display = "none"
 sendButton.style.display = "none"
 cancelButton.style.display = "none"
 
@@ -28,7 +30,7 @@ const oldValues = {
     name: nameInput.value,
     surname: surnameInput.value,
     aboutMe: aboutMeInput.value
-};
+}
 
 function hide() {
     sendButton.style.display = "none"
@@ -42,22 +44,24 @@ function hide() {
 }
 
 sendButton.onclick = async (event) => {
-    const nickname = nicknameInput.value.trim();
-    const email = emailInput.value.trim();
-    const name = nameInput.value.trim();
-    const surname = surnameInput.value.trim();
-    const aboutMe = aboutMeInput.value.trim();
+    const nickname = nicknameInput.value.trim()
+    const email = emailInput.value.trim()
+    const name = nameInput.value.trim()
+    const surname = surnameInput.value.trim()
+    const aboutMe = aboutMeInput.value.trim()
 
     if (!email) {
-        errorMessage.textContent = "Email обязателен!";
-        return;
+        errorMessage.textContent = "Email обязателен!"
+        return
     }
     if (!nickname) {
-        errorMessage.textContent = "Никнейм обязателен!";
-        return;
+        errorMessage.textContent = "Никнейм обязателен!"
+        return
     }
-    errorMessage.textContent = "";
+    errorMessage.textContent = ""
 
+    loadingModal.style.display = "flex"
+    
     // send to server
     try {
         const resp = await fetch("/api/users/me", {
@@ -66,31 +70,33 @@ sendButton.onclick = async (event) => {
             body: JSON.stringify({
                 nickname, email, name, surname, aboutMe
             })
-        });
+        })
 
-        const result = await resp.json();
-        console.log(result);
+        const result = await resp.json()
         if (!resp.ok) {
             errorMessage.textContent = result.error
+            loadingModal.style.display = "none"
             return
         }
     } catch (e) {
-        console.log(e)
+        console.error(e)
         errorMessage.textContent = e.message
     }
     
+    loadingModal.style.display = "none"
+
     hide()
-};
+}
 
 cancelButton.onclick = (event) => {
-    nicknameInput.value = oldValues.nickname;
-    emailInput.value = oldValues.email;
-    nameInput.value = oldValues.name;
-    surnameInput.value = oldValues.surname;
-    aboutMeInput.value = oldValues.aboutMe;
+    nicknameInput.value = oldValues.nickname
+    emailInput.value = oldValues.email
+    nameInput.value = oldValues.name
+    surnameInput.value = oldValues.surname
+    aboutMeInput.value = oldValues.aboutMe
 
     hide()
-};
+}
 
 document.querySelectorAll(".delete-tool").forEach(btn => {
     btn.onclick = async () => {
@@ -99,13 +105,16 @@ document.querySelectorAll(".delete-tool").forEach(btn => {
 
         if (!confirmed) return
 
+        loadingModal.style.display = "flex"
+
         try {
             const resp = await fetch(`/api/laboratories/${labId}`, {
                 method: "DELETE"
-            });
+            })
 
             if (!resp.ok) {
-                const result = await resp.json();
+                const result = await resp.json()
+                loadingModal.style.display = "none"
                 alert("Ошибка при удалении: " + (result.error || "Неизвестная ошибка"))
                 return
             }
@@ -129,6 +138,8 @@ document.querySelectorAll(".delete-tool").forEach(btn => {
             console.error(e)
             alert("Не удалось удалить лабораторию: " + e.message)
         }
+
+        loadingModal.style.display = "none"
     }
 })
 

@@ -15,7 +15,8 @@ export const PostCreateSchema = z.object({
     text: z.string(),
     tags: z.string().array().optional(),
     course: z.coerce.number().int().min(1).max(4).optional(),
-    semester: z.enum([Semester.AUTUMN, Semester.SPRING]).optional()
+    semester: z.enum([Semester.AUTUMN, Semester.SPRING]).optional(),
+    simLink: z.string().optional()
 })
 
 export const PostEditSchema = z.object({
@@ -25,7 +26,8 @@ export const PostEditSchema = z.object({
     text: z.string().optional(),
     tags: z.string().array().optional(),
     course: z.coerce.number().int().min(1).max(4).optional(),
-    semester: z.enum([Semester.AUTUMN, Semester.SPRING]).optional()
+    semester: z.enum([Semester.AUTUMN, Semester.SPRING]).optional(),
+    simLink: z.string().optional()
 })
 
 export type PostsFilterSchemaType = z.infer<typeof PostsFilterSchema>

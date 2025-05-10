@@ -20,6 +20,15 @@ export async function getUserById(id: number) {
     })
 }
 
+export async function getUserIdByNickname(nickname: string) {
+    return await prisma.user.findUnique({
+        where: { nickname },
+        select: {
+            id: true
+        }
+    })
+}
+
 export async function updateUser(id: number, data: UserEditShemaType) {
     const user = await prisma.user.update({
         data: {
@@ -37,4 +46,10 @@ export async function deleteUser(id: number) {
     })
 
     return user
+}
+
+export async function getRolesList() {
+    const roles = await prisma.role.findMany()
+
+    return roles
 }

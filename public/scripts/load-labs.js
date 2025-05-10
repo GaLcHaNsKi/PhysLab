@@ -2,11 +2,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const section = document.getElementById("load-posts")
     const labList = document.getElementById("lab-list")
     const pageNumberSpan = document.getElementById("page-number")
+    const loadingModal = document.getElementById("loading")
 
     const prevButton = document.getElementById("prev-tool")
     const nextButton = document.getElementById("next-tool")
     const submitButton = document.getElementById("submit")
 
+    loadingModal.style.display = "none"
+    
     let currentPage = 1
     const limit = 10
 
@@ -25,6 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const fetchLabs = async () => {
+        loadingModal.style.display = "flex"
+
         const filters = getFilters()
         pageNumberSpan.textContent = currentPage
 
@@ -36,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
             })
 
             if (!res.ok) {
+                loadingModal.style.display = "none"
                 throw new Error(`Ошибка сервера: ${res.statusText}`)
             }
 
@@ -45,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!Array.isArray(data) || data.length === 0) {
                 labList.innerHTML = "<span>Ничего нет...</span>"
+                loadingModal.style.display = "none"
                 return
             }
 
@@ -61,14 +68,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 const infoRow = document.createElement("div")
                 infoRow.className = "form-row"
 
-                const descriptionSpan = document.createElement("span")
+                const descriptionSpan = document.createElement("p")
                 descriptionSpan.id = "description"
                 descriptionSpan.textContent = truncate(lab.description || "Нет описания", 300)
 
                 const authorSpan = document.createElement("span")
                 authorSpan.id = "author"
-                authorSpan.textContent = `Автор: ${lab.owner.nickname}`
-
+                if (lab.owner?.id) {
+                    const authorLink = document.createElement("a")
+                    authorLink.href = `/app/users/${lab.owner.id}`
+                    authorLink.textContent = lab.owner.nickname || "неизвестен"
+                    authorSpan.innerHTML = "Автор: "
+                    authorSpan.appendChild(authorLink)
+                } else {
+                    authorSpan.textContent = "Автор: неизвестен"
+                }
+                
                 infoRow.appendChild(descriptionSpan)
                 infoRow.appendChild(authorSpan)
 
@@ -81,6 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(err)
             labList.innerHTML = `<span>Ошибка загрузки: ${err.message}</span>`
         }
+
+        loadingModal.style.display = "none"
     }
 
     submitButton.onclick = () => {
@@ -91,12 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
     prevButton.onclick = () => {
         if (currentPage > 1) {
             currentPage--
+            pageNumberSpan.textContent = currentPage
             fetchLabs()
         }
     }
 
     nextButton.onclick = () => {
         currentPage++
+        pageNumberSpan.textContent = currentPage
         fetchLabs()
     }
 

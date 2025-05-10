@@ -170,6 +170,7 @@ model Post {
   
   laboratoryWorkId Int?
   laboratoryWork LaboratoryWork? @relation(fields: [laboratoryWorkId], references: [id], name: "LaboratoryWorkToPost")
+  simulatorLink String?
 
   authorId  Int
   author    User     @relation(fields: [authorId], references: [id], name: "PostAuthor")

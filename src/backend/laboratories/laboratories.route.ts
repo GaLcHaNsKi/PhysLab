@@ -4,16 +4,35 @@ import { LaboratoryCreateSchema, LaboratoryEditSchema, LaboratoryFilterSchema } 
 import { checkPermission, createLaboratory, editLaboratory, getAllPublicLaboratoriesList, deleteLaboratory, getLaboratoryById, checkIsUserInLaboratory, getFilteredLaboratories } from "./laboratories.service"
 import { joiningRoute } from "./joining/joining.route"
 import { participantsRoute } from "./participants/participants.route"
-import { errorAnswer, undefinedAnswer } from "../../answers"
+import { errorAnswer, successAnswer, undefinedAnswer } from "../../answers"
 import { MiddlewareVariables } from "../.."
 import { postsRoute } from "./posts/posts.route"
+import { getUserById, getUserIdByNickname } from "../users/user.service"
 
 export const laboratoriesRoute = new Hono<{ Variables: MiddlewareVariables }>()
 
-laboratoriesRoute.route("/joining", joiningRoute)
+laboratoriesRoute.use("/:labId/posts/*", async (c, next) => {
+    const isSelf = c.req.query("isSelf") === "true"
+    if (isSelf) return next()
+    
+    const laboratoryId = parseInt(c.req.param("labId"))
+    if (isNaN(laboratoryId)) return c.text("Invalid laboratory id", 400)
+    
+    const laboratory = await getLaboratoryById(laboratoryId)
+    if (!laboratory) return c.json({ error: "Laboratory not found" }, 404)
+
+    if (laboratory.visibility === "PRIVATE") {
+        const userId = c.get("user").id
+
+        if (!await checkIsUserInLaboratory(laboratoryId, userId)) return c.json({ error: "You don't have permission to view this laboratory" }, 403)
+    }
+
+    return next()
+})
+
+laboratoriesRoute.route("/:labId/joining", joiningRoute)
 laboratoriesRoute.route("/:labId/participants", participantsRoute)
 laboratoriesRoute.route("/:labId/posts", postsRoute)
-
 
 laboratoriesRoute.post("/",
     validator('json', (value, c) => {
@@ -23,7 +42,6 @@ laboratoriesRoute.post("/",
         return parsed.data
     }),
     async (c) => {
-        console.log(c.get("user"))
         const ownerId = c.get("user").id
         const data = c.req.valid("json")
         
@@ -40,9 +58,10 @@ laboratoriesRoute.post("/",
     }
 )
 
-laboratoriesRoute.put("/",
+laboratoriesRoute.put("/:labId",
     validator('json', (value, c) => {
-        const parsed = LaboratoryEditSchema.safeParse(value)
+        const laboratoryId = parseInt(c.req.param("labId") || "a")
+        const parsed = LaboratoryEditSchema.safeParse({ ...value, id: laboratoryId })
         if (!parsed.success) return c.text(parsed.error.message, 400)
 
         return parsed.data
@@ -58,7 +77,7 @@ laboratoriesRoute.put("/",
 
             if (!lab) return c.json({ error: "Laboratory not found" }, 404)
 
-            return c.text("Laboratory's info was changed!", 200)
+            return c.json(successAnswer, 200)
         } catch(e: any) {
             if (e.code === "P2002") return c.json({ error: "This laboratory name is busy" }, 409)
             else console.error(e)
@@ -117,8 +136,8 @@ laboratoriesRoute.delete("/:id", async (c) => {
     }
 })
 
-laboratoriesRoute.get("/:id", async (c) => {
-    const laboratoryId = parseInt(c.req.param("id"))
+laboratoriesRoute.get("/:labId", async (c) => {
+    const laboratoryId = parseInt(c.req.param("labId"))
     if (isNaN(laboratoryId)) return c.text("Invalid laboratory id", 400)
     
     try {
@@ -137,5 +156,18 @@ laboratoriesRoute.get("/:id", async (c) => {
 
         return c.json(errorAnswer, 500)
     }
+})
 
+laboratoriesRoute.get("/:labId/check-perm", async c => {
+    const labId = +c.req.param("labId")
+    const user = c.req.query("user")
+    const perm = c.req.query("perm")
+
+    if (!user || !perm) return c.json({ error: "userId and perm is required" }, 400)
+
+    const userId = user==="self"? c.get("user").id : (await getUserIdByNickname(user))?.id || -1
+
+    const result = await checkPermission(labId, perm, userId)
+
+    return c.json(result, 200)
 })

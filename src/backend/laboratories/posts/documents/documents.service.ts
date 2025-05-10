@@ -15,7 +15,14 @@ export async function getAllDocuments(postId: number) {
         }
     })
 
-    return documents
+    let files: any[] = []
+    for (let doc of documents) {
+        const link = await dbx.filesGetTemporaryLink({ path: '/documents/' + doc.uuidName })
+        
+        files.push({ document: doc, link: link.result.link })
+    }
+    
+    return files
 }
 
 export async function createFileAndUpload(postId: number, userId: number, file: File) {
@@ -26,6 +33,9 @@ export async function createFileAndUpload(postId: number, userId: number, file: 
     })
     if (!post) throw "Post not found"
 
+    console.log()
+    if (file.size == 0) throw "File cannot be empty!"
+    
     const uuidName = v4() + "." + file.name.split('.').pop()
 
     const res = await dbx.filesUpload({path: '/documents/' + uuidName, contents: file})

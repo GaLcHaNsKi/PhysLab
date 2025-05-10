@@ -36,7 +36,7 @@ export async function generateJoiningToken(laboratoryId: number, userId: number,
     else if (!await checkPermission(laboratoryId, "create_joining_other_link", userId)) throw "You don't have permission to create joining link"
     
     // generating jwt token
-
+    console.log(laboratoryId)
     const token = await sign({
         laboratoryId,
         roleId,
@@ -50,7 +50,7 @@ export async function generateJoiningToken(laboratoryId: number, userId: number,
 export async function joinLaboratoryByLink(token: string, joinerId: number) {
     // data includes params for joining at laboratory, joinerId is id of user that follow by link with token
     const data = await verify(token, env.JWT_SECRET!) as { laboratoryId: number, roleId: number }
-
+    console.log(data)
     if (!data || !data.laboratoryId || !data.roleId) throw "Invalid token"
 
     const role = await prisma.role.findUnique({

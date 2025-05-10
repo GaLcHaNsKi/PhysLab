@@ -160,6 +160,9 @@ export async function getFilteredLaboratories(
     }
 
     const laboratories = await prisma.laboratory.findMany({
+        orderBy: [
+            { createdAt: "desc" }
+        ],
         where,
         skip: (page - 1) * limit,
         take: limit,
@@ -168,6 +171,7 @@ export async function getFilteredLaboratories(
             name: true,
             owner: {
                 select: {
+                    id: true,
                     nickname: true
                 }
             },

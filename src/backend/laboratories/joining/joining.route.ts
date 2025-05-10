@@ -7,9 +7,9 @@ import { alreadyJoinedAnswer, errorAnswer, undefinedAnswer } from "../../../answ
 
 export const joiningRoute = new Hono<{ Variables: MiddlewareVariables }>()
 
-joiningRoute.post("/:id/generate-token",
+joiningRoute.post("/generate-token",
     validator('json', (value, c) => {
-        const laboratoryId = c.req.param("id")
+        const laboratoryId = c.req.param("labId")
         const parsed = JoiningTokenSchema.safeParse({ ...value, laboratoryId: laboratoryId ? +laboratoryId : undefined })
         if (!parsed.success) return c.text(parsed.error.message, 400)
 
@@ -34,7 +34,7 @@ joiningRoute.post("/:id/generate-token",
     }
 )
 
-joiningRoute.post("/:token", async (c) => {
+joiningRoute.get("/:token", async (c) => {
     const token = c.req.param("token")
     const joinerId = c.get("user").id
 
@@ -52,7 +52,7 @@ joiningRoute.post("/:token", async (c) => {
     }
 })
 
-joiningRoute.post("/:labId/guest", async (c) => {
+joiningRoute.post("/as-guest", async (c) => {
     const laboratoryId = +(c.req.param("labId") || "")
     if (isNaN(laboratoryId)) 
         return c.json({ error: "Invalid laboratory id" }, 400)

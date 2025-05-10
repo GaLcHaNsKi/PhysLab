@@ -58,7 +58,6 @@ authRoute.post("/sign-in",
 
 authRoute.post("/sign-up",
     validator('json', (value, c) => {
-        console.log(value)
         const parsed = SignUpSchema.safeParse(value)
         if (!parsed.success) return c.text(parsed.error.message, 400)
 

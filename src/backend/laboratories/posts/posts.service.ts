@@ -13,24 +13,31 @@ export async function getAllPosts(labId: number, page: number, take: number, fil
         isDeleted: false
     }
     if (!isSelf) where.laboratoryId = labId
-    
+
     if (filter.semester) {
         where.laboratoryWork = {
             course: filter.course,
             semester: filter.semester
         }
-    } else {
+    } else if (!isSelf) {
         where.laboratoryWorkId = null // обычные посты
     }
 
     const posts = await prisma.post.findMany({
+        orderBy: [
+            { createdAt: "desc" }
+        ],
         take,
         skip: (page - 1) * take,
         where,
         select: {
             id: true,
             title: true,
+            text: true,
             laboratoryId: true,
+            createdAt: true,
+            laboratoryWorkId: true,
+            tags: true,
             author: {
                 select: {
                     id: true,
@@ -39,6 +46,25 @@ export async function getAllPosts(labId: number, page: number, take: number, fil
             }
         }
     })
+
+    // const formattedPosts = posts.map((post) => {
+    //     const description = post.text
+    //         ? post.text.length > 300
+    //             ? post.text.slice(0, 300) + '...'
+    //             : post.text
+    //         : null
+
+    //     return {
+    //         id: post.id,
+    //         title: post.title,
+    //         description,
+    //         laboratoryId: post.laboratoryId,
+    //         author: post.author,
+    //         tags: post.tags
+    //     }
+    // })
+
+    // console.log(formattedPosts)
 
     return posts
 }
@@ -62,6 +88,7 @@ export async function getPostById(postId: number, labId: number, isLabWork: bool
             id: true,
             title: true,
             text: true,
+            simulatorLink: true,
             author: {
                 select: {
                     id: true,
@@ -89,7 +116,7 @@ export async function getLaboratoryWorkId(course: number, semester: "AUTUMN" | "
             id: true
         }
     })
-    
+
     if (!labWork) throw "Laboratory work not found"
     return labWork.id!
 }
@@ -99,19 +126,20 @@ export async function createPost(authorId: number, data: PostCreateSchemaType, i
         title: data.title,
         text: data.text,
         authorId,
-        tags: data.tags? data.tags : [],
+        tags: data.tags ? data.tags : [],
         laboratoryId: data.labId,
-    };
+    }
 
     if (isLabWork) {
         postData.laboratoryWorkId = await getLaboratoryWorkId(data.course!, data.semester!)
+        postData.simulatorLink = data.simLink
     }
 
     const post = await prisma.post.create({
         data: postData
-    });
+    })
 
-    return post;
+    return post
 }
 
 
@@ -132,7 +160,7 @@ export async function editPost(data: PostEditSchemaType, userId: number, isEditU
             }
         }
     })
-    
+
     if (!post) throw "Post not found"
     if (post.authorId !== userId && !isEditUnownedPost) throw "You don't have permission to edit this post!"
 
@@ -152,6 +180,8 @@ export async function editPost(data: PostEditSchemaType, userId: number, isEditU
 
             postData.laboratoryWorkId = await getLaboratoryWorkId(data.course, data.semester)
         }
+        
+        postData.simulatorLink = data.simLink
     }
 
     const editedPost = await prisma.post.update({
@@ -175,7 +205,7 @@ export async function deletePost(postId: number, labId: number, userId: number) 
             authorId: true
         }
     })
-    
+
     if (!post) throw "Post not found"
     if (post.authorId !== userId) throw "You don't have permission to delete this post!"
 

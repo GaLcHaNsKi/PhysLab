@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { MiddlewareVariables } from '../..'
 import { validator } from 'hono/validator';
 import { UserEditSchema } from './user.shemas';
-import { updateUser, deleteUser, getUserById } from './user.service';
+import { updateUser, deleteUser, getUserById, getRolesList } from './user.service';
 import { deleteCookie } from 'hono/cookie';
 import { errorAnswer, successAnswer, undefinedAnswer } from '../../answers';
 
@@ -17,6 +17,18 @@ usersRoute.get('/me', async (c) => {
         console.error(e)
         
         return c.json({ error: 'Strange error' }, 500)
+    }
+})
+
+usersRoute.get('/roles', async (c) => {
+    try {
+        const roles = await getRolesList()
+
+        return c.json(roles)
+    } catch (e: any) {
+        console.error(e)
+        
+        return c.json(errorAnswer, 500)
     }
 })
 

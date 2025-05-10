@@ -7,10 +7,12 @@ import { createPost, deletePost, editPost, getAllPosts, getPostById } from "./po
 import { PostCreateSchema, PostEditSchema, PostsFilterSchema } from "./posts.schema";
 import { checkPermission } from "../laboratories.service";
 import { documentRoute } from "./documents/documents.route";
+import { commentsRoute } from "./comments/comments.route";
 
 export const postsRoute = new Hono<{ Variables: MiddlewareVariables}>()
 
 postsRoute.route("/:postId/documents", documentRoute)
+postsRoute.route("/:postId/comments", commentsRoute)
 
 postsRoute.post("/get-all",
     validator('query', (value, c) => {
@@ -32,7 +34,7 @@ postsRoute.post("/get-all",
         const isLabWork = c.req.query("isLabWork")
         const filter = c.req.valid("json")
 
-        if (isSelf) filter.authorNickname = c.get("user").nickname
+        if (isSelf) if (!filter.authorNickname) filter.authorNickname = c.get("user").nickname
         
         if (isLabWork === "true") {
             const { course, semester } = c.req.valid("json")
@@ -92,7 +94,7 @@ postsRoute.post("/create",
             if (!await checkPermission(data.labId, "create_post", c.get("user").id)) return c.json({ message: "You don't have permission to create posts in this laboratory!" }, 403)
             const post = await createPost(c.get("user").id, data, isLabWork)
 
-            return c.json(successAnswer, 200)
+            return c.json(post, 200)
         } catch(e: any) {
             if (e === "Laboratory work not found") return c.json(undefinedAnswer, 404)
             else console.error(e)

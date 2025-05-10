@@ -2,6 +2,9 @@ import { Hono } from "hono";
 import { MiddlewareVariables } from "../..";
 import { getFilteredLaboratories, getLaboratoriesByUserId } from "../../backend/laboratories/laboratories.service";
 import { Posts } from "../components/posts-list.component";
+import { getUserById } from "../../backend/users/user.service";
+import { undefinedAnswer } from "../../answers";
+import { LoadingAtom } from '../components/loading-atom.component';
 
 export const userPageRoute = new Hono<{Variables: MiddlewareVariables}>()
 
@@ -44,7 +47,7 @@ userPageRoute.get("/me", async (c) => {
                 <span class="error-message"></span>
             </section>
             <section class="elem-list" id="lab-list">
-                <h2>Лаборатории, где вы являетесь участником</h2>
+                <h3>Лаборатории, где вы являетесь участником</h3>
                 {(!labs || labs.length === 0) && <span>Тут пока ничего нет...</span>}
                 {...labs.map((lab) =>
                         <a href={`/app/laboratories/${lab.laboratory.id}`} lab-id={lab.laboratory.id}>{lab.laboratory.name}</a>
@@ -52,7 +55,7 @@ userPageRoute.get("/me", async (c) => {
             </section>
             
             <section class="elem-list"  id="own-lab-list">
-                <h2>Ваши лаборатории</h2>
+                <h3>Ваши лаборатории</h3>
                 {(!ownLabs || ownLabs.length === 0) && <span>Тут пока ничего нет...</span>}
                 {...ownLabs.map((lab) =>
                     <div class="title-with-tool-button">
@@ -63,10 +66,59 @@ userPageRoute.get("/me", async (c) => {
                 <a href="/app/laboratories/create">Создать лабораторию</a>
             </section>
             <Posts name="Ваши посты из всех лабораторий" isSelf={true}/>
-            4. Выход
-            5. Удалить аккаунт
+
+            <LoadingAtom/>
             <script src="/public/scripts/user-me.js" defer></script>
         </div>,
         { title: "Home" }
+    )
+})
+
+userPageRoute.get("/:id", async (c) => {
+    const id = +c.req.param("id")
+    if (isNaN(id)) return c.json({ error: "Incorrect ID" }, 400)
+    
+    const user = await getUserById(id)
+    if (!user) return c.json(undefinedAnswer, 404)
+    
+    const labs = await getLaboratoriesByUserId(id)
+    const ownLabs = await getFilteredLaboratories(1, 100, { authorNickname: user.nickname })
+    
+    return c.render(
+        <div className="content">
+            <section class="elem-list">
+                <h2>О пользователе</h2>
+                <span>Никнейм: {user.nickname}</span>
+                <span>Email: {user.email}</span>
+                {user.name && <span>Имя: {user.name}</span>}
+                {user.surname && <span>Фамилия: {user.surname}</span>}
+                {user.aboutMe && <p>Описание: {user.aboutMe}</p>}
+            </section>
+            <section class="elem-list" id="lab-list">
+                {(labs.length !== 0) &&
+                <>
+                    <h3>Лаборатории, в которых {user.nickname} учавствует</h3>
+                    {...labs.map((lab) =>
+                            <a href={`/app/laboratories/${lab.laboratory.id}`} lab-id={lab.laboratory.id}>{lab.laboratory.name}</a>
+                    )}
+                </>
+                }
+            </section>
+            
+            <section class="elem-list"  id="own-lab-list">
+                {(ownLabs.length !== 0) &&
+                <>
+                    <h3>Лаборатории, принадлежащие {user.nickname}</h3>
+                    {...ownLabs.map((lab) =>
+                        <a href={`/app/laboratories/${lab.id}`}>{lab.name}</a>
+                    )}
+                    <a href="/app/laboratories/create">Создать лабораторию</a>
+                </>
+                }
+            </section>
+            <LoadingAtom/>
+            <Posts name="Посты" isSelf={true} author={user.nickname}/>
+        </div>,
+        { title: user.nickname }
     )
 })

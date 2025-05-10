@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { MiddlewareVariables } from "../../../..";
 import { createFileAndUpload, deleteFileById, getAllDocuments, getFileById } from "./documents.service";
 import { errorAnswer, successAnswer, undefinedAnswer } from "../../../../answers";
-import { DropboxResponseError } from "dropbox";
 
 export const documentRoute = new Hono<{ Variables: MiddlewareVariables}>()
 
@@ -19,7 +18,7 @@ documentRoute.get("/", async (c) => {
 
     try {
         const docs = await getAllDocuments(+postId)
-
+        
         return c.json(docs, 200)
     } catch (error) {
         console.error(error)
@@ -52,7 +51,7 @@ documentRoute.post("/", async (c) => {
         return c.json(successAnswer, 200)
     } catch (e: any) {
         if (e === "Post not found") return c.json({ error: e }, 404)
-        //else if (e instanceof DropboxResponseError) return c.json({ error: e.error }, 500)
+        else if (e === "File cannot be empty!") return c.json({ error: e }, 400)
         else console.error(e)
 
         return c.json(errorAnswer, 500)

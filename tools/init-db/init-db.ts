@@ -83,7 +83,7 @@ async function init() {
             { roleId: 2, permissionId: 17 },
             { roleId: 2, permissionId: 19 },
             { roleId: 2, permissionId: 20 },
-            { roleId: 1, permissionId: 24 },
+            { roleId: 2, permissionId: 24 },
             // researcher
             { roleId: 3, permissionId: 4 },
             { roleId: 3, permissionId: 12 },

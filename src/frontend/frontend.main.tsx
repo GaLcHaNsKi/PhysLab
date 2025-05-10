@@ -31,9 +31,9 @@ appRoute.use(
                     {!isAuth && <HeaderMain />}
                     {isAuth && <HeaderAuth />}
                     {children}
-                    <footer>
+                    {/* {<footer>
                         <span>PhysLab# 2025</span>
-                    </footer>
+                    </footer>} */}
                 </body>
             </html>
         );
@@ -41,16 +41,19 @@ appRoute.use(
 );
 
 appRoute.route("/auth", authPageRoute)
-appRoute.route("/user", userPageRoute)
+appRoute.route("/users", userPageRoute)
 appRoute.route("/laboratories", labPageRoute)
 
 appRoute.get("/", (c) => {
     return c.render(
-        <div class="content">
-            <h1>Добро пожаловать в <acronym title='Читается как "Физ Лаб Шарп"'>PhysLab#</acronym>!</h1>
+        <div class="content-with-two-columns">
+            <img src="./public/images/laboratory.jpg"/>
             <article>
+                <h1>Добро пожаловать в <acronym title='Читается как "Физ Лаб Шарп"'>PhysLab#</acronym>!</h1>
+               
                 <h2>Что это такое?</h2>
-                    <p><b>PhysLab#</b> - это веб-сервис для управления лабораториями университетов. Всё, что Вам нужно для этого - зарегистрироваться, создать лабораторию - и вперёд!</p>
+                <p><b>PhysLab#</b> - это веб-сервис для управления лабораториями университетов. Всё, что Вам нужно для этого - зарегистрироваться, создать лабораторию - и вперёд!</p>
+               
                 <h2>Возможности PhysLab#</h2>
                 <p>Что же можно тут делать? Управлять лабораторными работами, писать посты, загружать документы, подключать сотрудников и студентов, читать чужие посты, и, используя сторонний сервис, работать с симуляторами для закрепления знаний или наглядной демонстрации физических процессов. </p>
                 <p>Работайте с удовольствием!!!</p>

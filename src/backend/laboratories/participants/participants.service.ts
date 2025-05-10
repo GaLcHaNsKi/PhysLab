@@ -27,8 +27,6 @@ export async function getParticipants(laboratoryId: number, page: number, take: 
         }
     })
 
-    console.log(participants)
-
     return participants
 }
 

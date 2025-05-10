@@ -1,40 +1,46 @@
-export function Posts({ name, labId, isLabWork, isSelf }: any) {
+export function Posts({ name, labId, isLabWork, isSelf, author, doesHasPermissionToCreate }: any) {
     return (
-        <section class="elem-list" id="load-posts" labId={labId} isSelf={isSelf} isLabWork={isLabWork}>
-            <div class="title-with-tool-button">
-                <h2>{name}</h2>
-                <div className="tool-button"><img src="/public/icons/prev.svg" id="prev-tool"/></div>
-                <span id="page-number">0</span>
-                <div className="tool-button"><img src="/public/icons/next.svg" id="next-tool"/></div>
+        <section class="elem-list" id="load-posts" labId={labId} isSelf={isSelf} author={author} isLabWork={isLabWork}>
+            <div className="form-row">
+                <div class="title-with-tool-button">
+                    <h2>{name}</h2>
+                    <div className="tool-button"><img src="/public/icons/prev.svg" id="prev-tool"/></div>
+                    <span id="page-number">0</span>
+                    <div className="tool-button"><img src="/public/icons/next.svg" id="next-tool"/></div>
+                </div>
+                {doesHasPermissionToCreate && <a href={`/app/laboratories/${labId}/posts/create?isLabWork=${isLabWork}`}>Создать</a>}
             </div>
-
             <div className="title-with-tool-button">
                 <label>
-                    Title:
+                    Название:
                     <input type="text" name="title" />
                 </label>
                 {!isSelf &&
                     <label>
-                        Author Nickname:
+                        Автор (никнейм):
                         <input type="text" name="authorNickname" />
                     </label>
                 }
                 <label>
-                    Tags:
-                    <input type="text" name="tags" placeholder="Comma-separated" />
+                    Теги:
+                    <input type="text" name="tags" placeholder="Через запятую" />
                 </label>
                 {isLabWork && (
                     <>
                         <label>
-                            Course:
-                            <input type="number" name="course" min="1" max="4" />
+                            Курс:
+                            <select name="course">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
                         </label>
                         <label>
-                            Semester:
+                            Семестр:
                             <select name="semester">
-                                <option value="">Select</option>
-                                <option value="AUTUMN">Autumn</option>
-                                <option value="SPRING">Spring</option>
+                                <option value="AUTUMN">Осенний</option>
+                                <option value="SPRING">Весенний</option>
                             </select>
                         </label>
                     </>
