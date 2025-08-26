@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (isEdit && labId && postId) {
                         try {
                             const res = await fetch(`/api/laboratories/${labId}/posts/${postId}`)
-                            if (!res.ok) throw new Error("Ошибка при получении данных поста")
                             const data = await res.json()
+                            if (!res.ok) throw new Error(data.error)
 
                             document.getElementById("post-title").value = data.title || ""
                             editor.setContent(data.text || "")

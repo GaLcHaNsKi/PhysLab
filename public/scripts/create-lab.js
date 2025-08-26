@@ -1,9 +1,9 @@
+const loadingModal = document.getElementById("loading")
+loadingModal.style.display = "none"
+
 document.getElementById("submit").onclick = async () => {
     const form = document.getElementById("create-lab-form")
     const errorMessage = document.getElementById("error-message")
-    const loadingModal = document.getElementById("loading")
-
-    loadingModal.style.display = "none"
 
     const name = form.name.value.trim()
     const description = form.description.value.trim()

@@ -68,7 +68,7 @@ async function main() {
 
         document.querySelectorAll('#answerComment').forEach(button => {
             button.onclick = e => {
-                const modal = document.querySelector('#modal-comments')
+                const modal = document.querySelector('#modal-comment')
                 const createCommentDiv = modal.querySelector('.create-comment')
                 const commentId = button.getAttribute('commentId')
 
@@ -87,7 +87,7 @@ async function main() {
 const openModalButton = document.querySelector('#openModal')
 if (openModalButton) {
     openModalButton.onclick = e => {
-        const modal = document.querySelector('#modal-comments')
+        const modal = document.querySelector('#modal-comment')
         const createCommentDiv = modal.querySelector('.create-comment')
 
         createCommentDiv.setAttribute('commentId', undefined)

@@ -18,7 +18,7 @@ labPageRoute.get("/create", (c) => {
             <h1>Создать лабораторию</h1>
             <LabForm />
             <LoadingAtom />
-            <script src="/public/scripts/create-lab.js" defer></script>
+            <script src="/public/scripts/create-lab.js"></script>
         </div>,
         { title: "Создание лаборатории" }
     )

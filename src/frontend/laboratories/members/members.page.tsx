@@ -12,7 +12,7 @@ membersPageRoute.get("/", async (c) => {
         <div class="content" labId={labId}>
             <a href={`/app/laboratories/${labId}`}>К лаборатории</a>
             <div class="title-with-tool-button">
-                <h2>Лаборатории</h2>
+                <h2>Участники</h2>
                 <div className="tool-button"><img src="/public/icons/prev.svg" id="prev-tool" /></div>
                 <span id="page-number">0</span>
                 <div className="tool-button"><img src="/public/icons/next.svg" id="next-tool" /></div>

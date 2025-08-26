@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { LoadingAtom } from "../components/loading-atom.component";
 
 export const authPageRoute = new Hono()
 
@@ -22,6 +23,7 @@ authPageRoute.get("/sign-in", (c) => {
                 </div>
                 <span class="error-message"></span>
             </form>
+            <LoadingAtom/>
             <script src="/public/scripts/sign-in.js" defer></script>
         </div>,
         { title: "Sign In" }
@@ -67,6 +69,7 @@ authPageRoute.get("/sign-up", (c) => {
                 </div>
                 <span class="error-message"></span>
             </form>
+            <LoadingAtom/>
             <script src="/public/scripts/sign-up.js" defer></script>
         </div>,
         { title: "Sign Up" }

@@ -52,7 +52,7 @@ export function PostEditor({ labId, isLabWork, postId }: any) {
             <input type="button" value="Сохранить" id="save"/>
             <span class="error-message"></span>
 
-            <script src="https://cdn.tiny.cloud/1/50tf73rvhq1iovg8z36pjsrllq7d2fmfykixz6bpk6i5fjh9/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+            <script src="https://cdn.tiny.cloud/1/t6ogmhb5ghurbvqyst1zjgf015rve2rc4efle7mchrwn81n2/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
             <script src="/public/scripts/create-post.js" defer></script>
         </div>
     )
